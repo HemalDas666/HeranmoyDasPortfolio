@@ -1,0 +1,294 @@
+.certificates-section {
+    margin-top: 85px;
+    min-height: calc(100vh - 85px);
+    padding: clamp(1rem, 4vw, 4rem) clamp(1rem, 3vw, 2rem);
+    background: linear-gradient(135deg, #2a1b3d 0%, #44318d 50%, #632c7a 100%);
+    width: 100%;
+}
+
+.certificates-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px solid rgba(230, 126, 212, 0.2);
+    width: 100%;
+}
+
+.certificates-header {
+    text-align: center;
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.certificates-header h1 {
+    color: #e67ed4;
+    font-size: clamp(2rem, 6vw, 2.5rem);
+    margin-bottom: 0.5rem;
+}
+
+.certificates-header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+.certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.certificate-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(230, 126, 212, 0.1);
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+}
+
+.certificate-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(230, 126, 212, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.certificate-badge i {
+    color: #e67ed4;
+    font-size: 1.5rem;
+}
+
+.certificate-content {
+    flex: 1;
+}
+
+.certificate-content h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
+}
+
+.certificate-content h3 {
+    color: #e67ed4;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.certificate-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.certificate-meta i {
+    color: #e67ed4;
+    margin-right: 0.3rem;
+    width: 14px;
+}
+
+.certificate-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.achievement-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: rgba(230, 126, 212, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(230, 126, 212, 0.2);
+}
+
+.achievement-item {
+    text-align: center;
+}
+
+.achievement-number {
+    color: #e67ed4;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.achievement-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.references-section {
+    margin-top: 1rem;
+}
+
+.references-section h2 {
+    color: #e67ed4;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.references-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.reference-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 1.2rem;
+    border: 1px solid rgba(230, 126, 212, 0.1);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.reference-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(230, 126, 212, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.reference-icon i {
+    color: #e67ed4;
+    font-size: 1.3rem;
+}
+
+.reference-content {
+    flex: 1;
+}
+
+.reference-content h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.reference-title {
+    color: #e67ed4;
+    font-size: 0.85rem;
+    margin-bottom: 0.1rem;
+}
+
+.reference-org {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.reference-phone {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+}
+
+.reference-phone i {
+    color: #e67ed4;
+    margin-right: 0.3rem;
+    font-size: 0.8rem;
+}
+
+.reference-note {
+    text-align: center;
+    color: #e67ed4;
+    font-size: 0.9rem;
+    font-style: italic;
+    padding: 1rem;
+    background: rgba(230, 126, 212, 0.05);
+    border-radius: 8px;
+    border: 1px dashed rgba(230, 126, 212, 0.3);
+}
+
+@media (max-width: 480px) {
+    .certificates-section {
+        margin-top: 70px;
+        padding: 0.8rem;
+    }
+    
+    .certificates-container {
+        padding: 1.2rem;
+    }
+    
+    .certificate-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.2rem;
+    }
+    
+    .certificate-badge {
+        margin-bottom: 0.5rem;
+    }
+    
+    .certificate-meta {
+        justify-content: center;
+    }
+    
+    .achievement-stats {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 1rem;
+    }
+    
+    .achievement-number {
+        font-size: 1.5rem;
+    }
+    
+    .reference-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .certificates-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .references-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .certificates-section {
+        margin-top: 70px;
+        padding: 0.8rem;
+    }
+    
+    .certificates-container {
+        padding: 1.2rem;
+    }
+    
+    .certificates-header {
+        margin-bottom: 1.2rem;
+    }
+    
+    .certificates-header h1 {
+        font-size: 2rem;
+    }
+    
+    .achievement-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
