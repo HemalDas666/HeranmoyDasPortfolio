@@ -582,3 +582,512 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ===== SMART AI ASSISTANT WITH FIXED API KEY FORMAT =====
+class SmartAIAssistant {
+    constructor() {
+        // Your API key - now with correct format
+        this.API_KEY = 'a701a100-ba21-474c-a76b-6ce461be6378';
+        this.API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        this.MODEL = 'google/gemini-2.0-flash-exp:free'; // Free model
+        
+        this.initializeElements();
+        this.attachEvents();
+        this.loadHistory();
+        this.setupFallbackResponses(); // Setup fallback responses
+    }
+
+    initializeElements() {
+        this.trigger = document.getElementById('smartAiTrigger');
+        this.container = document.getElementById('smartAiContainer');
+        this.messages = document.getElementById('smartAiMessages');
+        this.input = document.getElementById('smartAiInput');
+        this.sendBtn = document.getElementById('smartAiSend');
+        this.clearBtn = document.getElementById('smartAiClear');
+        this.closeBtn = document.getElementById('smartAiClose');
+        this.suggestions = document.querySelectorAll('.smart-ai-suggestion');
+        
+        if (!this.trigger || !this.container) {
+            console.error('AI Assistant elements not found!');
+            return;
+        }
+        
+        console.log('✅ AI Assistant Initialized');
+    }
+
+    setupFallbackResponses() {
+        // Fallback responses in case API fails
+        this.fallbackResponses = {
+            'heranmoy': `👤 **About Heranmoy Das:**
+
+Heranmoy Das is a **Digital Marketing Specialist & Mentor** with NSDA Level-3 Certification.
+
+**Expertise:**
+• SEO (Search Engine Optimization)
+• SEM (Search Engine Marketing)
+• Lead Generation
+• Performance-Based Campaign Management
+
+**Experience:**
+• Digital Marketing Specialist
+• Mentor for 500+ students
+• 200%+ ROAS on campaigns
+• 150% organic traffic increase
+
+**Contact:** heranmoy.das@example.com`,
+            
+            'skills': `💪 **Heranmoy's Key Skills:**
+
+• Digital Marketing Strategy
+• SEO & SEM
+• Lead Generation
+• Social Media Marketing
+• Content Marketing
+• Google Analytics
+• Facebook/Google Ads
+• Campaign Management
+• Marketing Analytics
+• Team Training & Mentoring`,
+            
+            'contact': `📬 **Contact Heranmoy Das:**
+
+📧 Email: heranmoy.das@example.com
+💼 LinkedIn: linkedin.com/in/heranmoydas
+📱 GitHub: github.com/heranmoydas
+🌐 Portfolio: www.heranmoy.com
+
+Or use the contact form on this website!`,
+            
+            'certification': `🏆 **Heranmoy's Certifications:**
+
+• NSDA Level-3 Certified Digital Marketing Specialist
+• Google Analytics Individual Qualification
+• Google Ads Certification
+• Facebook Blueprint Certification
+• HubSpot Content Marketing Certification
+• SEMrush SEO Toolkit Certification`,
+            
+            'experience': `💼 **Professional Experience:**
+
+**Digital Marketing Specialist** (Current)
+• Managing SEO/SEM campaigns
+• Lead generation optimization
+• Performance marketing
+
+**Digital Marketing Mentor**
+• Trained 500+ students
+• Workshop facilitator
+• Curriculum developer
+
+**Key Achievements:**
+• 200%+ ROAS on PPC campaigns
+• 150% organic traffic growth
+• 50+ successful projects`,
+            
+            'service': `🛠️ **Services Offered:**
+
+✓ SEO Audit & Optimization
+✓ Social Media Management
+✓ PPC Campaign Management
+✓ Lead Generation
+✓ Content Strategy
+✓ Marketing Analytics
+✓ Digital Marketing Consultation
+✓ Team Training
+✓ Website Analytics Setup
+✓ Conversion Rate Optimization`,
+            
+            'digital marketing': `📱 **Digital Marketing Overview:**
+
+Digital marketing promotes products/services through digital channels:
+
+**Main Channels:**
+• SEO - Organic search visibility
+• SEM - Paid advertising
+• Social Media - Platform marketing
+• Email Marketing - Direct communication
+• Content Marketing - Valuable content
+• Affiliate Marketing - Partnership marketing
+
+**Benefits:**
+• Global reach
+• Measurable results
+• Cost-effective
+• Targeted audience
+• Real-time analytics`,
+            
+            'seo': `🔍 **SEO (Search Engine Optimization):**
+
+SEO improves website visibility in search engines.
+
+**Key Components:**
+• Keyword Research
+• On-Page Optimization
+• Technical SEO
+• Link Building
+• Local SEO
+• Mobile Optimization
+• Content Quality
+• User Experience
+
+**Benefits:**
+• Free organic traffic
+• Long-term results
+• Brand credibility
+• Better user experience`,
+            
+            'trends': `📈 **Digital Marketing Trends 2026:**
+
+1. **AI-Powered Marketing**
+   - Generative AI for content
+   - Predictive analytics
+   - Personalization at scale
+
+2. **Voice Search Optimization**
+   - 50% of searches voice-based
+   - Natural language keywords
+   - Featured snippets focus
+
+3. **Video Marketing**
+   - Short-form videos dominate
+   - Live streaming growth
+   - Interactive content
+
+4. **Privacy-First Marketing**
+   - Cookieless tracking
+   - First-party data focus
+   - Consent management
+
+5. **Social Commerce**
+   - In-app purchases
+   - Shoppable posts
+   - Influencer collaboration`
+        };
+    }
+
+    attachEvents() {
+        // Trigger click
+        this.trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleContainer();
+        });
+
+        // Close button
+        this.closeBtn.addEventListener('click', () => {
+            this.container.classList.remove('show');
+        });
+
+        // Clear chat
+        this.clearBtn.addEventListener('click', () => {
+            this.clearChat();
+        });
+
+        // Input events
+        this.input.addEventListener('input', () => {
+            this.toggleSendButton();
+        });
+
+        this.input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && this.input.value.trim()) {
+                this.sendMessage();
+            }
+        });
+
+        // Send button
+        this.sendBtn.addEventListener('click', () => {
+            this.sendMessage();
+        });
+
+        // Suggestions
+        this.suggestions.forEach(suggestion => {
+            suggestion.addEventListener('click', () => {
+                const query = suggestion.getAttribute('data-query');
+                this.input.value = query;
+                this.toggleSendButton();
+                this.sendMessage();
+            });
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (this.container.classList.contains('show') && 
+                !this.container.contains(e.target) && 
+                !this.trigger.contains(e.target)) {
+                this.container.classList.remove('show');
+            }
+        });
+
+        // Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.container.classList.contains('show')) {
+                this.container.classList.remove('show');
+            }
+        });
+    }
+
+    toggleContainer() {
+        this.container.classList.toggle('show');
+        if (this.container.classList.contains('show')) {
+            this.input.focus();
+        }
+    }
+
+    toggleSendButton() {
+        if (this.input.value.trim()) {
+            this.sendBtn.classList.add('active');
+            this.sendBtn.disabled = false;
+        } else {
+            this.sendBtn.classList.remove('active');
+            this.sendBtn.disabled = true;
+        }
+    }
+
+    async sendMessage() {
+        const message = this.input.value.trim();
+        if (!message) return;
+
+        // Disable input
+        this.input.disabled = true;
+        this.sendBtn.disabled = true;
+        this.sendBtn.classList.remove('active');
+
+        // Add user message
+        this.addMessage(message, 'user');
+        this.input.value = '';
+
+        // Show typing
+        this.showTyping();
+
+        try {
+            // Try to get AI response
+            const response = await this.getAIResponse(message);
+            this.hideTyping();
+            this.addMessage(response, 'bot');
+            
+        } catch (error) {
+            console.error('API Error:', error);
+            this.hideTyping();
+            
+            // Use fallback response
+            const fallbackResponse = this.getFallbackResponse(message);
+            this.addMessage(fallbackResponse, 'bot');
+        }
+
+        // Enable input
+        this.input.disabled = false;
+        this.input.focus();
+    }
+
+    async getAIResponse(userMessage) {
+        try {
+            const response = await fetch(this.API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.API_KEY}`,
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'Heranmoy Das Portfolio'
+                },
+                body: JSON.stringify({
+                    model: this.MODEL,
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are a helpful AI assistant for Heranmoy Das's portfolio. You have knowledge about digital marketing and can answer questions professionally."
+                        },
+                        {
+                            role: "user",
+                            content: userMessage
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+
+        } catch (error) {
+            console.log('Using fallback response system');
+            throw error;
+        }
+    }
+
+    getFallbackResponse(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Check for keywords and return appropriate response
+        if (lowerMessage.includes('heranmoy') || lowerMessage.includes('about') || lowerMessage.includes('who is')) {
+            return this.fallbackResponses.heranmoy;
+        }
+        else if (lowerMessage.includes('skill') || lowerMessage.includes('expertise') || lowerMessage.includes('know')) {
+            return this.fallbackResponses.skills;
+        }
+        else if (lowerMessage.includes('contact') || lowerMessage.includes('email') || lowerMessage.includes('reach') || lowerMessage.includes('hire')) {
+            return this.fallbackResponses.contact;
+        }
+        else if (lowerMessage.includes('certificate') || lowerMessage.includes('certification') || lowerMessage.includes('qualified')) {
+            return this.fallbackResponses.certification;
+        }
+        else if (lowerMessage.includes('experience') || lowerMessage.includes('work') || lowerMessage.includes('background')) {
+            return this.fallbackResponses.experience;
+        }
+        else if (lowerMessage.includes('service') || lowerMessage.includes('offer') || lowerMessage.includes('provide')) {
+            return this.fallbackResponses.service;
+        }
+        else if (lowerMessage.includes('digital marketing') || lowerMessage.includes('what is digital')) {
+            return this.fallbackResponses['digital marketing'];
+        }
+        else if (lowerMessage.includes('seo') || lowerMessage.includes('search engine')) {
+            return this.fallbackResponses.seo;
+        }
+        else if (lowerMessage.includes('trend') || lowerMessage.includes('2026') || lowerMessage.includes('latest')) {
+            return this.fallbackResponses.trends;
+        }
+        else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+            return `👋 Hello! I'm your AI assistant. I can help you with:
+
+• Information about Heranmoy Das
+• Digital Marketing strategies
+• SEO tips and techniques
+• Latest marketing trends
+• Career advice in marketing
+
+What would you like to know?`;
+        }
+        else {
+            return `I understand you're asking about "${message}". 
+
+While I'm currently in offline mode, I can still help with:
+• Heranmoy's portfolio and experience
+• Digital marketing basics
+• SEO and SEM concepts
+• Contact information
+
+Could you please ask something related to these topics? 
+
+Or try one of these questions:
+• "Who is Heranmoy Das?"
+• "What are his skills?"
+• "Tell me about SEO"
+• "Digital marketing trends 2026"
+• "How to contact Heranmoy?"`;
+        }
+    }
+
+    addMessage(content, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `smart-ai-message smart-ai-${sender}`;
+        
+        // Format content
+        const formattedContent = this.formatMessage(content);
+        
+        messageDiv.innerHTML = `
+            <div class="smart-ai-avatar">
+                <i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>
+            </div>
+            <div class="smart-ai-bubble">
+                ${formattedContent}
+            </div>
+        `;
+        
+        this.messages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'smart-ai-message smart-ai-bot';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = `
+            <div class="smart-ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="smart-ai-typing">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+        this.messages.appendChild(typingDiv);
+        this.scrollToBottom();
+    }
+
+    hideTyping() {
+        const typing = document.getElementById('typingIndicator');
+        if (typing) typing.remove();
+    }
+
+    formatMessage(text) {
+        // Convert URLs to links
+        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        
+        // Convert line breaks to <br>
+        text = text.replace(/\n/g, '<br>');
+        
+        // Convert markdown-style bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert bullet points
+        text = text.replace(/•/g, '•');
+        
+        return `<p>${text}</p>`;
+    }
+
+    scrollToBottom() {
+        this.messages.scrollTop = this.messages.scrollHeight;
+    }
+
+    loadHistory() {
+        try {
+            const saved = localStorage.getItem('smartAiHistory');
+            if (saved) {
+                const history = JSON.parse(saved);
+                history.slice(-5).forEach(msg => {
+                    this.addMessage(msg.content, msg.role);
+                });
+            }
+        } catch (e) {
+            console.error('Failed to load history');
+        }
+    }
+
+    saveHistory() {
+        try {
+            const messages = [];
+            document.querySelectorAll('.smart-ai-message').forEach(msg => {
+                const role = msg.classList.contains('smart-ai-user') ? 'user' : 'bot';
+                const content = msg.querySelector('.smart-ai-bubble p')?.textContent || '';
+                messages.push({ role, content });
+            });
+            localStorage.setItem('smartAiHistory', JSON.stringify(messages.slice(-10)));
+        } catch (e) {
+            console.error('Failed to save history');
+        }
+    }
+
+    clearChat() {
+        if (confirm('Clear all messages?')) {
+            this.messages.innerHTML = '';
+            localStorage.removeItem('smartAiHistory');
+            
+            // Add welcome message
+            this.addMessage(
+                "👋 Hi! I'm your AI assistant. I can help you with information about Heranmoy Das and digital marketing. What would you like to know?",
+                'bot'
+            );
+        }
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('smartAiTrigger')) {
+        window.smartAI = new SmartAIAssistant();
+    }
+});

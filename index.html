@@ -224,6 +224,68 @@
         </div>
     </div>
 
+    <!-- ===== SMART AI ASSISTANT ===== -->
+    <div class="smart-ai-trigger" id="smartAiTrigger">
+        <i class="fas fa-brain"></i>
+        <span class="smart-ai-badge">AI</span>
+    </div>
+
+    <div class="smart-ai-container" id="smartAiContainer">
+        <div class="smart-ai-header">
+            <div class="smart-ai-header-left">
+                <i class="fas fa-brain"></i>
+                <div>
+                    <h3>Smart AI Assistant</h3>
+                    <span class="smart-ai-status">● Online • Full Access</span>
+                </div>
+            </div>
+            <div class="smart-ai-header-right">
+                <button class="smart-ai-clear" id="smartAiClear" title="Clear chat">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <button class="smart-ai-close" id="smartAiClose" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="smart-ai-messages" id="smartAiMessages">
+            <div class="smart-ai-message smart-ai-bot">
+                <div class="smart-ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="smart-ai-bubble">
+                    <p>👋 Hi! I'm your AI assistant with full internet access. I can help you with:</p>
+                    <ul style="margin-left: 20px; margin-top: 5px; margin-bottom: 5px;">
+                        <li>📊 Digital Marketing & SEO</li>
+                        <li>👤 About Heranmoy Das</li>
+                        <li>💼 Career Advice</li>
+                        <li>🔍 Latest Trends 2026</li>
+                        <li>🌐 General Knowledge</li>
+                    </ul>
+                    <p>What would you like to know?</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="smart-ai-input-area">
+            <div class="smart-ai-input-wrapper">
+                <input type="text" id="smartAiInput" placeholder="Ask me anything..." autocomplete="off">
+                <button id="smartAiSend" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="smart-ai-suggestions">
+                <span class="smart-ai-suggestion" data-query="Who is Heranmoy Das?">About</span>
+                <span class="smart-ai-suggestion" data-query="What are Heranmoy's skills?">Skills</span>
+                <span class="smart-ai-suggestion" data-query="SEO trends 2026">SEO 2026</span>
+                <span class="smart-ai-suggestion" data-query="Digital marketing tips">Marketing</span>
+                <span class="smart-ai-suggestion" data-query="Contact Heranmoy">Contact</span>
+                <span class="smart-ai-suggestion" data-query="What is AI?">AI</span>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
