@@ -709,7 +709,7 @@ Heranmoy Das is a **Digital Marketing Specialist & Mentor** with NSDA Level-3 Ce
 • 200%+ ROAS on campaigns
 • 150% organic traffic increase
 
-**Contact:** heranmoy.das@example.com`,
+**Contact:** heranmoydas2003@gmail.com`,
             
             'skills': `💪 **Heranmoy's Key Skills:**
 
@@ -1166,3 +1166,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.smartAI = new SmartAIAssistant();
     }
 });
+
