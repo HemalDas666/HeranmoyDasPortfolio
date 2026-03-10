@@ -1,4 +1,20 @@
-// ===== NAVIGATION =====
+const firebaseConfig = {
+    apiKey: "AIzaSyBMLnucxfbjXi0Lf0TZEjT1Nd_1aXihTv4",
+    authDomain: "learningdb-2e196.firebaseapp.com",
+    databaseURL: "https://learningdb-2e196-default-rtdb.firebaseio.com",
+    projectId: "learningdb-2e196",
+    storageBucket: "learningdb-2e196.firebasestorage.app",
+    messagingSenderId: "298577512231",
+    appId: "1:298577512231:web:87c2d751da7202d1f24b02"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+let currentUser = null;
+let currentUsername = null;
+
 const hamburger = document.querySelector('.hamburger');
 const navMenu = document.querySelector('.nav-menu');
 
@@ -90,89 +106,104 @@ const setVh = () => {
 setVh();
 window.addEventListener('resize', setVh);
 
-// ===== VISITOR COUNTER =====
 if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-    let visitorCount = localStorage.getItem('visitorCount');
+    const counterRef = database.ref('visitorCounter');
     
-    if (visitorCount === null) {
-        visitorCount = 1;
+    counterRef.transaction((currentCount) => {
+        return (currentCount || 0) + 1;
+    }).then((result) => {
+        const countElement = document.getElementById('visitorCount');
+        if (countElement) {
+            countElement.textContent = result.snapshot.val() || 0;
+        }
+    });
+    
+    database.ref('visitorCounter').on('value', (snapshot) => {
+        const countElement = document.getElementById('visitorCount');
+        if (countElement) {
+            countElement.textContent = snapshot.val() || 0;
+        }
+    });
+}
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // User is logged in - get username from database
+        database.ref('users/' + user.uid).once('value').then((snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                currentUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    username: userData.username,
+                    createdAt: userData.createdAt,
+                    lastLogin: userData.lastLogin
+                };
+                currentUsername = userData.username;
+                updateUIForLoggedInUser();
+            }
+        });
     } else {
-        visitorCount = parseInt(visitorCount) + 1;
-    }
-    
-    localStorage.setItem('visitorCount', visitorCount);
-    
-    const countElement = document.getElementById('visitorCount');
-    if (countElement) {
-        countElement.textContent = visitorCount;
-    }
-}
-
-// ===== FIREBASE AUTHENTICATION =====
-let currentUser = null;
-let firebaseReady = false;
-
-// Check if Firebase is ready
-if (window.firebaseAuth) {
-    firebaseReady = true;
-    console.log('Firebase already available');
-}
-
-// Listen for Firebase ready event
-window.addEventListener('firebase-ready', () => {
-    firebaseReady = true;
-    console.log('Firebase is now ready');
-    
-    const savedUser = sessionStorage.getItem('currentUser');
-    if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        updateUIForLoginStatus();
+        currentUser = null;
+        currentUsername = null;
+        updateUIForLoggedOutUser();
     }
 });
 
-const savedUser = sessionStorage.getItem('currentUser');
-if (savedUser) {
-    currentUser = JSON.parse(savedUser);
+function updateUIForLoggedInUser() {
+    const loginTrigger = document.getElementById('openPopupBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const profileCircle = document.getElementById('profileCircle');
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    
+    if (loginTrigger && currentUsername) {
+        const firstLetter = currentUsername.charAt(0).toUpperCase();
+        
+        loginTrigger.innerHTML = `
+            <div class="profile-circle-small">${firstLetter}</div>
+        `;
+        loginTrigger.classList.add('profile-trigger');
+        
+        if (profileCircle) profileCircle.textContent = firstLetter;
+        if (profileName) profileName.textContent = currentUsername;
+        if (profileEmail) profileEmail.textContent = currentUser.email;
+    }
+    
+    document.addEventListener('click', closeDropdownOnClickOutside);
 }
 
-function updateUIForLoginStatus() {
+function updateUIForLoggedOutUser() {
     const loginTrigger = document.getElementById('openPopupBtn');
-    if (!loginTrigger) return;
+    const profileDropdown = document.getElementById('profileDropdown');
     
-    if (currentUser) {
-        const firstName = currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'User';
-        loginTrigger.innerHTML = `<i class="fas fa-user-circle"></i><span>${firstName}</span>`;
-        
-        if (!document.querySelector('.logout-trigger')) {
-            const logoutBtn = document.createElement('button');
-            logoutBtn.className = 'logout-trigger';
-            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-            logoutBtn.title = 'Logout';
-            logoutBtn.addEventListener('click', logout);
-            loginTrigger.parentNode.insertBefore(logoutBtn, loginTrigger.nextSibling);
-        }
-    } else {
+    if (loginTrigger) {
         loginTrigger.innerHTML = `<i class="fas fa-user-circle"></i><span>Login</span>`;
-        
-        const logoutBtn = document.querySelector('.logout-trigger');
-        if (logoutBtn) {
-            logoutBtn.remove();
-        }
+        loginTrigger.classList.remove('profile-trigger');
+    }
+    
+    if (profileDropdown) {
+        profileDropdown.classList.remove('show');
+    }
+    
+    document.removeEventListener('click', closeDropdownOnClickOutside);
+}
+
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
     }
 }
 
-async function logout() {
-    try {
-        if (firebaseReady && window.signOut) {
-            await window.signOut(window.firebaseAuth);
+function closeDropdownOnClickOutside(e) {
+    const dropdown = document.getElementById('profileDropdown');
+    const loginTrigger = document.getElementById('openPopupBtn');
+    
+    if (dropdown && loginTrigger) {
+        if (!dropdown.contains(e.target) && !loginTrigger.contains(e.target)) {
+            dropdown.classList.remove('show');
         }
-        currentUser = null;
-        sessionStorage.removeItem('currentUser');
-        updateUIForLoginStatus();
-        showNotification('Logged out successfully', 'success');
-    } catch (error) {
-        console.error('Logout error:', error);
-        showNotification('Error logging out', 'error');
     }
 }
 
@@ -203,7 +234,13 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
-// ===== POPUP ELEMENTS =====
+function checkUsernameExists(username) {
+    return database.ref('usernames/' + username.toLowerCase()).once('value')
+        .then((snapshot) => {
+            return snapshot.exists();
+        });
+}
+
 const openPopupBtn = document.getElementById('openPopupBtn');
 const popupOverlay = document.getElementById('popupOverlay');
 const closePopup = document.getElementById('closePopup');
@@ -213,9 +250,15 @@ const loginForm = document.getElementById('loginForm');
 const signupForm = document.getElementById('signupForm');
 
 if (openPopupBtn) {
-    openPopupBtn.addEventListener('click', () => {
-        popupOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+    openPopupBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        if (currentUser) {
+            toggleProfileDropdown();
+        } else {
+            popupOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
     });
 }
 
@@ -251,7 +294,6 @@ if (loginTab && signupTab) {
     });
 }
 
-// ===== FIREBASE SIGNUP =====
 const signupFormElement = document.getElementById('signupFormElement');
 if (signupFormElement) {
     signupFormElement.addEventListener('submit', async (e) => {
@@ -262,11 +304,12 @@ if (signupFormElement) {
         submitBtn.textContent = 'Creating...';
         submitBtn.disabled = true;
         
-        const name = signupFormElement.querySelector('input[placeholder="Full Name"]').value;
-        const email = signupFormElement.querySelector('input[placeholder="Email Address"]').value;
-        const password = signupFormElement.querySelector('input[placeholder="Password"]').value;
-        const confirmPassword = signupFormElement.querySelectorAll('input[placeholder="Password"]')[1].value;
+        const username = document.getElementById('signupUsername').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirmPassword').value;
         
+        // Validation
         if (password !== confirmPassword) {
             showNotification('Passwords do not match', 'error');
             submitBtn.textContent = originalText;
@@ -281,52 +324,45 @@ if (signupFormElement) {
             return;
         }
         
-        if (!firebaseReady || !window.createUserWithEmailAndPassword) {
-            showNotification('Firebase not ready. Please refresh.', 'error');
+        if (username.length < 3) {
+            showNotification('Username must be at least 3 characters', 'error');
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             return;
         }
         
         try {
-            console.log('Attempting to create user:', email);
+            // Check if username exists
+            const usernameExists = await checkUsernameExists(username);
+            if (usernameExists) {
+                showNotification('Username already taken', 'error');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
             
-            const userCredential = await window.createUserWithEmailAndPassword(
-                window.firebaseAuth, 
-                email, 
-                password
-            );
-            
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const user = userCredential.user;
-            console.log('User created:', user.uid);
             
-            await window.setDoc(window.doc(window.firebaseDb, 'users', user.uid), {
-                name: name,
+            // Save user data to database
+            const userData = {
+                username: username,
                 email: email,
+                password: password,
                 createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                uid: user.uid
-            });
-            
-            console.log('User data saved to Firestore');
-            
-            currentUser = {
-                uid: user.uid,
-                email: user.email,
-                displayName: name
+                lastLogin: new Date().toISOString()
             };
             
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            await database.ref('users/' + user.uid).set(userData);
+            await database.ref('usernames/' + username.toLowerCase()).set(user.uid);
             
             showNotification('Account created successfully!', 'success');
             
             setTimeout(() => {
                 popupOverlay.classList.remove('active');
                 document.body.style.overflow = '';
-                updateUIForLoginStatus();
+                signupFormElement.reset();
             }, 1500);
-            
-            signupFormElement.reset();
             
         } catch (error) {
             console.error('Signup error:', error);
@@ -334,7 +370,7 @@ if (signupFormElement) {
             
             switch(error.code) {
                 case 'auth/email-already-in-use':
-                    errorMessage = 'Email already in use';
+                    errorMessage = 'Email already registered';
                     break;
                 case 'auth/invalid-email':
                     errorMessage = 'Invalid email address';
@@ -342,11 +378,8 @@ if (signupFormElement) {
                 case 'auth/weak-password':
                     errorMessage = 'Password is too weak';
                     break;
-                case 'auth/network-request-failed':
-                    errorMessage = 'Network error. Check connection';
-                    break;
                 default:
-                    errorMessage = error.message || 'Signup failed';
+                    errorMessage = error.message;
             }
             
             showNotification(errorMessage, 'error');
@@ -357,7 +390,7 @@ if (signupFormElement) {
     });
 }
 
-// ===== FIREBASE LOGIN =====
+// ===== LOGIN FORM =====
 const loginFormElement = document.getElementById('loginFormElement');
 if (loginFormElement) {
     loginFormElement.addEventListener('submit', async (e) => {
@@ -368,82 +401,64 @@ if (loginFormElement) {
         submitBtn.textContent = 'Logging in...';
         submitBtn.disabled = true;
         
-        const email = loginFormElement.querySelector('input[type="email"]').value;
-        const password = loginFormElement.querySelector('input[type="password"]').value;
-        
-        if (!firebaseReady || !window.signInWithEmailAndPassword) {
-            showNotification('Firebase not ready. Please refresh.', 'error');
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            return;
-        }
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
         
         try {
-            console.log('Attempting to login:', email);
+            // Get user ID from username
+            const usernameSnapshot = await database.ref('usernames/' + username.toLowerCase()).once('value');
+            const uid = usernameSnapshot.val();
             
-            const userCredential = await window.signInWithEmailAndPassword(
-                window.firebaseAuth, 
-                email, 
-                password
-            );
-            
-            const user = userCredential.user;
-            console.log('User logged in:', user.uid);
-            
-            let userName = email.split('@')[0];
-            try {
-                const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
-                if (userDoc.exists()) {
-                    userName = userDoc.data().name || userName;
-                }
-            } catch (e) {
-                console.warn('Could not fetch user data:', e);
+            if (!uid) {
+                showNotification('Username not found', 'error');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
             }
             
-            try {
-                await window.updateDoc(window.doc(window.firebaseDb, 'users', user.uid), {
-                    lastLogin: new Date().toISOString()
-                });
-            } catch (e) {
-                console.warn('Could not update last login:', e);
+            // Get user email from database
+            const userSnapshot = await database.ref('users/' + uid + '/email').once('value');
+            const email = userSnapshot.val();
+            
+            if (!email) {
+                showNotification('User data not found', 'error');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
             }
             
-            currentUser = {
-                uid: user.uid,
-                email: user.email,
-                displayName: userName
-            };
+            // Login with email and password
+            await auth.signInWithEmailAndPassword(email, password);
             
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            // Update last login
+            await database.ref('users/' + uid).update({
+                lastLogin: new Date().toISOString()
+            });
             
             showNotification('Login successful!', 'success');
             
+            // Close popup
             setTimeout(() => {
                 popupOverlay.classList.remove('active');
                 document.body.style.overflow = '';
-                updateUIForLoginStatus();
+                loginFormElement.reset();
             }, 1500);
-            
-            loginFormElement.reset();
             
         } catch (error) {
             console.error('Login error:', error);
-            let errorMessage = 'Login failed';
+            let errorMessage = 'Invalid username or password';
             
             switch(error.code) {
-                case 'auth/user-not-found':
                 case 'auth/wrong-password':
+                case 'auth/user-not-found':
                 case 'auth/invalid-credential':
-                    errorMessage = 'Invalid email or password';
+                    errorMessage = 'Invalid username or password';
                     break;
                 case 'auth/too-many-requests':
                     errorMessage = 'Too many attempts. Try again later';
                     break;
-                case 'auth/network-request-failed':
-                    errorMessage = 'Network error. Check connection';
-                    break;
                 default:
-                    errorMessage = error.message || 'Login failed';
+                    errorMessage = error.message;
             }
             
             showNotification(errorMessage, 'error');
@@ -454,113 +469,116 @@ if (loginFormElement) {
     });
 }
 
+// ===== FORGOT PASSWORD =====
 const forgotLink = document.querySelector('.forgot-link');
 if (forgotLink) {
     forgotLink.addEventListener('click', (e) => {
         e.preventDefault();
-        showNotification('Password reset - Feature coming soon', 'error');
+        
+        const email = prompt('Enter your email address:');
+        if (email) {
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showNotification('Password reset email sent!', 'success');
+                })
+                .catch((error) => {
+                    showNotification('Error: ' + error.message, 'error');
+                });
+        }
     });
 }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && popupOverlay.classList.contains('active')) {
-        popupOverlay.classList.remove('active');
-        document.body.style.overflow = '';
+// ===== PROFILE DROPDOWN BUTTONS =====
+document.getElementById('userDetailsBtn')?.addEventListener('click', () => {
+    // Hide dropdown
+    document.getElementById('profileDropdown').classList.remove('show');
+    
+    // Show user details modal
+    if (currentUser) {
+        document.getElementById('detailUsername').textContent = currentUser.username || '-';
+        document.getElementById('detailEmail').textContent = currentUser.email || '-';
+        document.getElementById('detailJoined').textContent = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleString() : '-';
+        document.getElementById('detailLastLogin').textContent = currentUser.lastLogin ? new Date(currentUser.lastLogin).toLocaleString() : '-';
+        document.getElementById('detailUID').textContent = currentUser.uid || '-';
+        
+        document.getElementById('userDetailsModal').classList.add('active');
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, checking Firebase status...');
-    updateUIForLoginStatus();
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    // Hide dropdown
+    document.getElementById('profileDropdown').classList.remove('show');
     
-    const style = document.createElement('style');
-    style.textContent = `
-        .logout-trigger {
-            position: fixed;
-            bottom: 20px;
-            right: 100px;
-            background: rgba(230, 126, 212, 0.15);
-            border: 1px solid rgba(230, 126, 212, 0.3);
-            border-radius: 50px;
-            padding: 0.6rem 1rem;
-            color: #fff;
-            cursor: pointer;
-            z-index: 998;
-            backdrop-filter: blur(5px);
-            transition: background 0.2s;
-        }
-        
-        .logout-trigger i {
-            color: #e67ed4;
-            font-size: 1.1rem;
-        }
-        
-        .logout-trigger:hover {
-            background: rgba(230, 126, 212, 0.3);
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(42, 27, 61, 0.95);
-            border-left: 4px solid #e67ed4;
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            color: #fff;
-            z-index: 10000;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.success {
-            border-left-color: #00ff00;
-        }
-        
-        .notification.success i {
-            color: #00ff00;
-        }
-        
-        .notification.error {
-            border-left-color: #ff4444;
-        }
-        
-        .notification.error i {
-            color: #ff4444;
-        }
-        
-        .notification i {
-            font-size: 1.2rem;
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        @media (max-width: 480px) {
-            .logout-trigger {
-                bottom: 15px;
-                right: 85px;
-                padding: 0.5rem 0.8rem;
-            }
-            
-            .notification {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                padding: 0.8rem 1rem;
-                font-size: 0.9rem;
-            }
-        }
-    `;
-    document.head.appendChild(style);
+    // Logout
+    auth.signOut().then(() => {
+        showNotification('Logged out successfully', 'success');
+    }).catch((error) => {
+        showNotification('Error logging out', 'error');
+    });
 });
+
+// ===== CLOSE MODAL =====
+document.getElementById('closeModal')?.addEventListener('click', () => {
+    document.getElementById('userDetailsModal').classList.remove('active');
+});
+
+document.getElementById('userDetailsModal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('userDetailsModal')) {
+        document.getElementById('userDetailsModal').classList.remove('active');
+    }
+});
+
+// ===== CLOSE ON ESCAPE KEY =====
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        // Close popup
+        if (popupOverlay.classList.contains('active')) {
+            popupOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Close modal
+        const modal = document.getElementById('userDetailsModal');
+        if (modal.classList.contains('active')) {
+            modal.classList.remove('active');
+        }
+        
+        // Close dropdown
+        const dropdown = document.getElementById('profileDropdown');
+        if (dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
+
+// ===== ADD DYNAMIC STYLES =====
+const style = document.createElement('style');
+style.textContent = `
+    .profile-trigger {
+        padding: 0.3rem !important;
+    }
+    
+    .profile-circle-small {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e67ed4, #a64d79);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .login-trigger {
+        transition: all 0.2s ease;
+    }
+    
+    .login-trigger.profile-trigger {
+        background: rgba(230, 126, 212, 0.3);
+    }
+`;
+document.head.appendChild(style);

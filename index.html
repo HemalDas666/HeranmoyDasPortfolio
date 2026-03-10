@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="images/logo1.png" type="image/x-icon">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <nav class="main-nav">
@@ -84,6 +87,140 @@
             <i class="fas fa-eye"></i>
             <span>Total Visited: </span>
             <span id="visitorCount">0</span>
+        </div>
+    </div>
+
+    <!-- ===== LOGIN TRIGGER BUTTON ===== -->
+    <div class="login-trigger" id="openPopupBtn">
+        <i class="fas fa-user-circle"></i>
+        <span>Login</span>
+    </div>
+
+    <!-- ===== PROFILE DROPDOWN (Initially Hidden) ===== -->
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-header">
+            <div class="profile-circle" id="profileCircle">H</div>
+            <div class="profile-info">
+                <span class="profile-name" id="profileName">User</span>
+                <span class="profile-email" id="profileEmail">user@example.com</span>
+            </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="userDetailsBtn">
+            <i class="fas fa-user-circle"></i>
+            <span>User Details</span>
+        </div>
+        <div class="dropdown-item" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </div>
+    </div>
+
+    <!-- ===== LOGIN/SIGNUP POPUP ===== -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-container">
+            <button class="popup-close" id="closePopup">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="popup-tabs">
+                <button class="tab-btn active" id="loginTab">Login</button>
+                <button class="tab-btn" id="signupTab">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <div class="popup-form active" id="loginForm">
+                <h3>Welcome Back!</h3>
+                <p>Login with your username</p>
+                <form id="loginFormElement">
+                    <div class="popup-input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="loginUsername" placeholder="Username" required>
+                    </div>
+                    <div class="popup-input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                    </div>
+                    
+                    <div class="popup-options">
+                        <label class="popup-checkbox">
+                            <input type="checkbox"> Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="popup-submit">Login</button>
+                </form>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="popup-form" id="signupForm">
+                <h3>Create Account</h3>
+                <p>Choose a username to get started</p>
+                <form id="signupFormElement">
+                    <div class="popup-input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signupUsername" placeholder="Choose Username" required>
+                    </div>
+                    <div class="popup-input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signupEmail" placeholder="Email Address" required>
+                    </div>
+                    <div class="popup-input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupPassword" placeholder="Password" required>
+                    </div>
+                    <div class="popup-input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
+                    </div>
+                    
+                    <div class="popup-options terms">
+                        <label class="popup-checkbox">
+                            <input type="checkbox" required> I agree to the Terms & Conditions
+                        </label>
+                    </div>
+
+                    <button type="submit" class="popup-submit">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== USER DETAILS MODAL ===== -->
+    <div class="modal-overlay" id="userDetailsModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>User Details</h3>
+                <button class="modal-close" id="closeModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="user-detail-item">
+                    <i class="fas fa-user"></i>
+                    <span class="detail-label">Username:</span>
+                    <span class="detail-value" id="detailUsername">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value" id="detailEmail">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <i class="fas fa-calendar"></i>
+                    <span class="detail-label">Joined:</span>
+                    <span class="detail-value" id="detailJoined">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <i class="fas fa-clock"></i>
+                    <span class="detail-label">Last Login:</span>
+                    <span class="detail-value" id="detailLastLogin">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <i class="fas fa-id-card"></i>
+                    <span class="detail-label">User ID:</span>
+                    <span class="detail-value" id="detailUID">-</span>
+                </div>
+            </div>
         </div>
     </div>
 
