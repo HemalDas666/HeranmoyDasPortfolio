@@ -726,7 +726,7 @@ Heranmoy Das is a **Digital Marketing Specialist & Mentor** with NSDA Level-3 Ce
             
             'contact': `📬 **Contact Heranmoy Das:**
 
-📧 Email: heranmoy.das@example.com
+📧 Email: heranmoydas2003@gmail.com
 💼 LinkedIn: linkedin.com/in/heranmoydas
 📱 GitHub: github.com/heranmoydas
 🌐 Portfolio: www.heranmoy.com
@@ -1166,4 +1166,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.smartAI = new SmartAIAssistant();
     }
 });
+
 
