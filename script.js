@@ -1,3 +1,73 @@
+// Add this to your main script.js file at the top or bottom
+function initHamburgerMenu() {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (!hamburger || !navMenu) {
+        console.log('Hamburger menu elements not found on this page');
+        return;
+    }
+    
+    console.log('Initializing hamburger menu');
+    
+    // Remove existing event listeners by cloning and replacing
+    const newHamburger = hamburger.cloneNode(true);
+    hamburger.parentNode.replaceChild(newHamburger, hamburger);
+    
+    // Get fresh references
+    const freshHamburger = document.querySelector('.hamburger');
+    const freshNavMenu = document.querySelector('.nav-menu');
+    
+    // Toggle menu on hamburger click
+    freshHamburger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        freshNavMenu.classList.toggle('active');
+        freshHamburger.classList.toggle('active');
+        
+        if (freshNavMenu.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a link
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            freshNavMenu.classList.remove('active');
+            freshHamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (freshNavMenu && freshHamburger) {
+            if (!freshNavMenu.contains(e.target) && !freshHamburger.contains(e.target)) {
+                freshNavMenu.classList.remove('active');
+                freshHamburger.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768 && freshNavMenu.classList.contains('active')) {
+            freshNavMenu.classList.remove('active');
+            freshHamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initHamburgerMenu);
+
+// Also initialize after any dynamic content changes
+window.addEventListener('load', initHamburgerMenu);
+
 const firebaseConfig = {
     apiKey: "AIzaSyBMLnucxfbjXi0Lf0TZEjT1Nd_1aXihTv4",
     authDomain: "learningdb-2e196.firebaseapp.com",
@@ -15,38 +85,40 @@ const database = firebase.database();
 let currentUser = null;
 let currentUsername = null;
 
-const hamburger = document.querySelector('.hamburger');
-const navMenu = document.querySelector('.nav-menu');
+// ===== REMOVE THIS DUPLICATE CODE =====
+// const hamburger = document.querySelector('.hamburger');
+// const navMenu = document.querySelector('.nav-menu');
 
-if (hamburger) {
-    hamburger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        navMenu.classList.toggle('active');
-        hamburger.classList.toggle('active');
-        
-        if (navMenu.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-    });
-}
-
-document.querySelectorAll('.nav-menu a').forEach(link => {
-    link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-        hamburger.classList.remove('active');
-        document.body.style.overflow = '';
-    });
-});
-
-document.addEventListener('click', (e) => {
-    if (!navMenu?.contains(e.target) && !hamburger?.contains(e.target)) {
-        navMenu?.classList.remove('active');
-        hamburger?.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
+// if (hamburger) {
+//     hamburger.addEventListener('click', (e) => {
+//         e.stopPropagation();
+//         navMenu.classList.toggle('active');
+//         hamburger.classList.toggle('active');
+//         
+//         if (navMenu.classList.contains('active')) {
+//             document.body.style.overflow = 'hidden';
+//         } else {
+//             document.body.style.overflow = '';
+//         }
+//     });
+// }
+// 
+// document.querySelectorAll('.nav-menu a').forEach(link => {
+//     link.addEventListener('click', () => {
+//         navMenu.classList.remove('active');
+//         hamburger.classList.remove('active');
+//         document.body.style.overflow = '';
+//     });
+// });
+// 
+// document.addEventListener('click', (e) => {
+//     if (!navMenu?.contains(e.target) && !hamburger?.contains(e.target)) {
+//         navMenu?.classList.remove('active');
+//         hamburger?.classList.remove('active');
+//         document.body.style.overflow = '';
+//     }
+// });
+// ===== END OF DUPLICATE CODE =====
 
 const currentPath = window.location.pathname;
 
@@ -78,6 +150,9 @@ window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         if (window.innerWidth > 768) {
+            // Use the freshNavMenu from your init function
+            const navMenu = document.querySelector('.nav-menu');
+            const hamburger = document.querySelector('.hamburger');
             navMenu?.classList.remove('active');
             hamburger?.classList.remove('active');
             document.body.style.overflow = '';
